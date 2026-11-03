@@ -98,7 +98,7 @@
     "classroom_status": "Turned in",
     "classroom_app_link": "verified correct",
     "classroom_github_link": "verified correct",
-    "classmate_trial": "owner confirmed completed; date and result details not yet provided",
+    "classmate_trial": "Owner reported completed on 2026-11-02: sign-in, saved stations, and observed an update without refresh. Overall feedback: 非常满意 (very satisfied). Not independently observed by the agent.",
     "supabase_plan": "Free; spend cap enabled; no payment methods",
     "vercel_plan": "Hobby",
     "supabase_mcp": "PASS: actual project-scoped MCP execute_sql query, worker redeployed and same minute cron schedule set through MCP",
@@ -129,5 +129,17 @@
     "next_read_count": 40,
     "next_changed_count": 4,
     "root_cause": "not established from retained sanitized logs"
+  },
+  "classmate_trial": {
+    "trial_date": "2026-11-02",
+    "reported_on": "2026-11-03",
+    "reported_completed_steps": [
+      "sign in",
+      "save stations",
+      "observe a genuine update without refreshing"
+    ],
+    "reported_overall_feedback": "非常满意",
+    "source": "project owner report in conversation",
+    "independently_observed_by_agent": false
   }
 }

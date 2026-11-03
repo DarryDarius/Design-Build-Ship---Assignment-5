@@ -22,7 +22,7 @@
 | Vercel 部署与自动发布 | 通过 | 公开页面、登录页、快照接口为200；GitHub main 触发生产部署，状态 READY |
 | GitHub README 与过程提交 | 通过 | 仓库公开为200；README 有应用链接、图、设置、验证、限额说明；真实规划、采集、UI、部署、用户反馈改进提交均保留 |
 | UI/UX 与迭代 | 通过 | 桌面、390px 手机布局已验；最近可用建议、跨区搜索、明确地点范围、低库存/备用站、可读性改进有回归记录 |
-| 同学真人试用 | 用户确认完成 | 用户在本轮核查中确认已完成登录→收藏→无需刷新观察真实更新；具体日期与结果仍待用户补充，未由代理代填 |
+| 同学真人试用 | 用户确认完成 | 用户确认于2026年11月2日完成登录→收藏→无需刷新观察真实更新；补录总体反馈为“非常满意”。信息来自用户报告，代理未独立观察该次试用 |
 | Classroom 提交 | 直接核验通过 | 页面状态 Turned in；两项附件分别为正确 Vercel 与 GitHub URL；没有撤回或修改提交 |
 | 免费计划与费用保护 | 通过，见说明 | Vercel Hobby；Supabase Free、Spend cap enabled、No payment methods；本次未升级计划或添加付款方式 |
 | Supabase MCP 工具连接 | 通过 | .mcp.json 与 .codex/config.toml 均限定本项目；OAuth 成功后通过实际 MCP execute_sql 返回40站、40条站况及活动计划；deploy_edge_function 发布第5版，并通过MCP设置同名每分钟cron。查询证据见 mcp-verification.json，发布/计划证据见 mcp-setup-verification.json |
@@ -57,9 +57,9 @@ changed_count=0 表示本次库存及服务字段没有变化，仍是一次成�
 
 任意地址搜索、本机免登录收藏、Clerk 生产实例属于后续产品工作。PDF 要求 Clerk 登录可用，没有要求购买自定义域名或隐藏开发模式。当前身份服务仍为开发实例，这项限制已公开说明。
 
-## 待补记录
+## 收尾记录
 
-- 同学试用的真实日期与结果；不编造姓名或反馈。
+- 同学试用记录已补齐：2026年11月2日，总体反馈“非常满意”；详见 CLASSMATE-TRIAL.md。
 - Supabase MCP 接入、实际查询、worker 发布与计划设置已补齐。继续保持本项目限定范围，OAuth 凭据不入库。
 - 四轮核心问答已在会话完成，继续用 LEARNING.md 复习。提交已成功；以上核查未撤回提交。
 

@@ -25,7 +25,7 @@ Used the actual running application in Chrome, including a 390px-wide responsive
 
 ## Human acceptance confirmation
 
-On November 3, the project owner confirmed that a real classmate had signed in, saved stations, and observed a genuine update without refreshing. The actual trial date and result details are awaiting the owner; the agent did not independently observe that trial.
+On November 3, the project owner reported that a real classmate tested Dockside on November 2, 2026, signed in, saved stations, and observed a genuine update without refreshing. The reported overall feedback was “非常满意” (“very satisfied”). This is an owner-reported trial; the agent did not independently observe it.
 
 The owner added the new repository to the Vercel GitHub installation, and `vercel git connect` returned Connected. Production is deployed and the public root, snapshot, sign-in page, and custom icon all returned 200. Manual deployment remains available as well.
 
