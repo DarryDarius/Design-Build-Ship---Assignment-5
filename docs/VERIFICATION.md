@@ -35,7 +35,7 @@ The owner added the new repository to the Vercel GitHub installation, and `verce
 
 ## Full assignment audit
 
-See ASSIGNMENT5-AUDIT.md and audit-2026-11-03.json for the Nov 3 recheck. All 22 tests, lint, typecheck, build, rolled-back SQL invariants, actual Clerk JWT isolation and Realtime event verification passed again. Google Classroom visibly showed Turned in with both correct links. The report records completed project-scoped MCP verification and distinguishes unassessed classroom explanation readiness from the working application.
+See ASSIGNMENT5-AUDIT.md and audit-2026-11-03.json for the Nov 3 recheck. All 22 tests, lint, typecheck, build, rolled-back SQL invariants, actual Clerk JWT isolation and Realtime event verification passed again. Google Classroom visibly showed Turned in with both correct links. The report records completed project-scoped MCP verification and the subsequent four interactive learning rounds. This is not a formal classroom assessment.
 
 ## MCP follow-up completed
 

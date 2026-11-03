@@ -90,3 +90,15 @@ On November 3, the project owner confirmed that a real classmate had signed in, 
 ## MCP versus CLI
 
 The CLI makes authenticated management operations directly. The MCP server exposes project tools through the Model Context Protocol. Both have now been exercised: the project-scoped MCP execute_sql query returned the live table counts, and deploy_edge_function plus execute_sql republished the current worker and set its named schedule. Having a config file alone was not treated as proof of a working connection. OAuth credentials remain in the client credential store.
+
+## Nov 3 interactive review
+
+Four core review rounds were completed in conversation: tracing an update, Realtime prerequisites, freshness, and interpreting unchanged runs and test boundaries. Key clarifications:
+
+- Supabase Cron triggers the worker every 60 seconds; dockside_commit_run performs the actual conditional database update.
+- Publication membership, SELECT grants, and an applicable RLS SELECT policy are separate prerequisites. Subscription filters are an additional check.
+- changed_at records a business-field change, including service flags; it is not a collection heartbeat.
+- An unchanged successful ingest avoids inventory rewrites but still inserts a worker_runs row and updates health.
+- RLS validation includes both public station reads and cross-user private-follow isolation. Realtime delivery needs its own real event test.
+
+This records the learning process, not a formal classroom grade or a guarantee of future performance.

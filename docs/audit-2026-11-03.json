@@ -102,7 +102,7 @@
     "supabase_plan": "Free; spend cap enabled; no payment methods",
     "vercel_plan": "Hobby",
     "supabase_mcp": "PASS: actual project-scoped MCP execute_sql query, worker redeployed and same minute cron schedule set through MCP",
-    "classroom_explanation_readiness": "not assessed interactively"
+    "classroom_explanation_readiness": "Four interactive learning rounds completed in conversation: data flow, Realtime access, freshness, and idempotency/log/test boundaries. Clarifications supplied; not a formal assessment or grade guarantee."
   },
   "mcp_follow_up": {
     "verified_at": "2026-11-03T19:21:36.725Z",

@@ -2,7 +2,7 @@
 
 核对时间：2026-11-03 13:24 CST。依据用户提供的五页 Live Data System 作业 PDF，核查了实际云端状态、真实服务测试、代码、Git 历史及 Google Classroom 提交页面。
 
-**结论：核心系统与已提交的两个链接通过复核。同学试用已由用户确认完成。Supabase MCP 已完成真实连接查询，并通过 MCP 重发 worker、设置同一每分钟计划。课堂解释能力仍需用户通过互动问答确认，不能以系统测试代替本人理解。**
+**结论：核心系统与已提交的两个链接通过复核。同学试用已由用户确认完成。Supabase MCP 已完成真实连接查询，并通过 MCP 重发 worker、设置同一每分钟计划。已在会话完成四轮核心问答及必要澄清，覆盖数据链路、Realtime权限、新鲜度和测试/日志边界；这不是教师的正式考核或评分保证。**
 
 ## 逐项结果
 
@@ -26,7 +26,7 @@
 | Classroom 提交 | 直接核验通过 | 页面状态 Turned in；两项附件分别为正确 Vercel 与 GitHub URL；没有撤回或修改提交 |
 | 免费计划与费用保护 | 通过，见说明 | Vercel Hobby；Supabase Free、Spend cap enabled、No payment methods；本次未升级计划或添加付款方式 |
 | Supabase MCP 工具连接 | 通过 | .mcp.json 与 .codex/config.toml 均限定本项目；OAuth 成功后通过实际 MCP execute_sql 返回40站、40条站况及活动计划；deploy_edge_function 发布第5版，并通过MCP设置同名每分钟cron。查询证据见 mcp-verification.json，发布/计划证据见 mcp-setup-verification.json |
-| 课堂讲解 / 互动问答 | 材料齐全，能力未考核 | LEARNING.md 解释字段、链路、freshness、日志和测试，并有问答题；尚未逐题检查用户自己的回答 |
+| 课堂讲解 / 互动问答 | 四轮核心问答已完成 | 已逐题核对数据链路、publication/SELECT/RLS、新鲜度，以及幂等性、日志、权限与推送验证边界；对话中已澄清Cron、SQL比较位置及每轮记录日志的区别。正式课堂表现由教师评估 |
 
 ## 费用限制说明
 
@@ -61,6 +61,6 @@ changed_count=0 表示本次库存及服务字段没有变化，仍是一次成�
 
 - 同学试用的真实日期与结果；不编造姓名或反馈。
 - Supabase MCP 接入、实际查询、worker 发布与计划设置已补齐。继续保持本项目限定范围，OAuth 凭据不入库。
-- 完成课堂问答准备。提交已成功；以上核查未撤回提交。
+- 四轮核心问答已在会话完成，继续用 LEARNING.md 复习。提交已成功；以上核查未撤回提交。
 
 原始检查摘要见 audit-2026-11-03.json；最新真实服务证据见 auth-verification.json 和 realtime-verification.json。
