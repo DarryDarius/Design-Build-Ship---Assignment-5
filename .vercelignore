@@ -1,0 +1,8 @@
+.local-secrets
+.env*
+.clerk
+.git
+.mcp.json
+test-results
+playwright-report
+tests

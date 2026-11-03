@@ -9,7 +9,7 @@ create table public.dockside_stations (
 create table public.dockside_station_status (
  station_id text primary key references public.dockside_stations(station_id),
  classic integer not null check(classic >= 0), electric integer not null check(electric >= 0),
- docks integer not null check(docks >= 0), installed boolean not null, renting boolean not null, returning boolean not null,
+ docks integer not null check(docks >= 0), installed boolean not null, renting boolean not null, "returning" boolean not null,
  changed_at timestamptz not null default now(), previous_classic integer, previous_electric integer, previous_docks integer,
  version bigint not null
 );
@@ -85,15 +85,15 @@ begin
  select started_at into started from public.dockside_worker_runs where id=p_id and result='running' for update;
  if started is null then raise exception 'invalid_run'; end if;
  if p_source_time < (select source_updated_at from public.dockside_source_health where source='divvy') then raise exception 'source_time_regressed'; end if;
- insert into public.dockside_station_status as current(station_id,classic,electric,docks,installed,renting,returning,version)
- select r.station_id,r.classic,r.electric,r.docks,r.installed,r.renting,r.returning,v
- from jsonb_to_recordset(p_rows) as r(station_id text,classic integer,electric integer,docks integer,installed boolean,renting boolean,returning boolean)
+ insert into public.dockside_station_status as existing_row(station_id,classic,electric,docks,installed,renting,"returning",version)
+ select r.station_id,r.classic,r.electric,r.docks,r.installed,r.renting,r."returning",v
+ from jsonb_to_recordset(p_rows) as r(station_id text,classic integer,electric integer,docks integer,installed boolean,renting boolean,"returning" boolean)
  on conflict(station_id) do update set
   classic=excluded.classic,electric=excluded.electric,docks=excluded.docks,
-  installed=excluded.installed,renting=excluded.renting,returning=excluded.returning,
-  previous_classic=current.classic,previous_electric=current.electric,previous_docks=current.docks,changed_at=now(),version=v
- where (current.classic,current.electric,current.docks,current.installed,current.renting,current.returning)
-  is distinct from (excluded.classic,excluded.electric,excluded.docks,excluded.installed,excluded.renting,excluded.returning);
+  installed=excluded.installed,renting=excluded.renting,"returning"=excluded."returning",
+  previous_classic=existing_row.classic,previous_electric=existing_row.electric,previous_docks=existing_row.docks,changed_at=now(),version=v
+ where (existing_row.classic,existing_row.electric,existing_row.docks,existing_row.installed,existing_row.renting,existing_row."returning")
+  is distinct from (excluded.classic,excluded.electric,excluded.docks,excluded.installed,excluded.renting,excluded."returning");
  get diagnostics changed=row_count;
  insert into public.dockside_source_health(source,last_attempt_at,last_success_at,source_updated_at,last_result,error_code,changed_count,duration_ms,station_reports,missing_ids,version)
  values('divvy',started,now(),p_source_time,'success',null,changed,p_duration,p_reports,p_missing,v)

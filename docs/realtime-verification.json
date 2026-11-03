@@ -1,0 +1,12 @@
+{
+  "verified_at": "2026-11-03T01:00:46.827Z",
+  "snapshot_stations": 40,
+  "snapshot_statuses": 40,
+  "transport": "Supabase Postgres Changes",
+  "received": {
+    "event": "UPDATE",
+    "version": 1793667646418,
+    "changed_count": 4,
+    "source_updated_at": "2026-11-03T00:59:41+00:00"
+  }
+}

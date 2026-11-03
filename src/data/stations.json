@@ -180,22 +180,6 @@
     "region": "hyde-park"
   },
   {
-    "station_id": "1683527972235589666",
-    "name": "Public Rack - Woodlawn Ave & 63rd St N",
-    "lat": 41.780621,
-    "lon": -87.596033,
-    "capacity": 1,
-    "region": "hyde-park"
-  },
-  {
-    "station_id": "1674190351216159352",
-    "name": "Public Rack - Hyde Park Blvd & 55th St",
-    "lat": 41.795,
-    "lon": -87.584113,
-    "capacity": 1,
-    "region": "hyde-park"
-  },
-  {
     "station_id": "2272165391055799996",
     "name": "Greenwood Ave & 63rd St",
     "short_name": "CHI02431",
@@ -211,6 +195,24 @@
     "lat": 41.7804056457,
     "lon": -87.5914159893,
     "capacity": 11,
+    "region": "hyde-park"
+  },
+  {
+    "station_id": "a3ad6c01-a135-11e9-9cda-0a87ae2ba916",
+    "name": "Lake Park Ave & 53rd St",
+    "short_name": "CHI00559",
+    "lat": 41.79949429373,
+    "lon": -87.5864498959,
+    "capacity": 15,
+    "region": "hyde-park"
+  },
+  {
+    "station_id": "a3ad95a7-a135-11e9-9cda-0a87ae2ba916",
+    "name": "Cottage Grove Ave & 63rd St",
+    "short_name": "CHI00587",
+    "lat": 41.78053094070882,
+    "lon": -87.6059702038765,
+    "capacity": 15,
     "region": "hyde-park"
   },
   {
@@ -286,14 +288,6 @@
     "region": "loop"
   },
   {
-    "station_id": "2213470258492470520",
-    "name": "Public Rack - Dearborn St & Jackson Ave",
-    "lat": 41.87802962,
-    "lon": -87.62940128,
-    "capacity": 4,
-    "region": "loop"
-  },
-  {
     "station_id": "2124470598870291364",
     "name": "Wabash Ave & Washington St",
     "short_name": "CHI02108",
@@ -353,6 +347,15 @@
     "short_name": "CHI01076",
     "lat": 41.876268,
     "lon": -87.629155,
+    "capacity": 15,
+    "region": "loop"
+  },
+  {
+    "station_id": "a3a42fa7-a135-11e9-9cda-0a87ae2ba916",
+    "name": "LaSalle St & Adams St",
+    "short_name": "CHI00451",
+    "lat": 41.87934437346,
+    "lon": -87.6319852213,
     "capacity": 15,
     "region": "loop"
   }
