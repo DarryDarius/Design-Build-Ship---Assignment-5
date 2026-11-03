@@ -77,7 +77,7 @@ npm run build
 npx vercel@latest deploy --prod --yes
 ```
 
-The initial CLI deployment succeeded and its public alias and snapshot endpoint both returned HTTP 200 without Vercel authentication. GitHub auto-deploy connection requires Vercel's GitHub installation to have access to this newly created repository; inspect the project Git settings if the CLI reports that access is missing. Manual CLI deployment remains available with the existing account.
+The production deployment is ready and its public root, snapshot, sign-in page, and icon returned HTTP 200 without Vercel authentication. The owner added this repository to the Vercel GitHub installation's selected repositories, and `vercel git connect` confirmed the connection. Pushes to `main` now trigger production builds; other branches create previews. Manual CLI deployment remains available with the existing account.
 
 ## Maintenance and limits
 

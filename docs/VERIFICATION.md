@@ -27,4 +27,4 @@ Used the actual running application in Chrome, including a 390px-wide responsive
 
 The classmate trial required by the assignment has not been fabricated. Ask a classmate to open the production URL, sign in with their own account, save a station, and observe a genuine update without refreshing. Record the actual date, outcome, and any issue here after it happens.
 
-GitHub automatic deploy requires the Vercel GitHub installation to include this new repository. Manual production deployment works. See operations notes for the current connection status.
+The owner added the new repository to the Vercel GitHub installation, and `vercel git connect` returned Connected. Production is deployed and the public root, snapshot, sign-in page, and custom icon all returned 200. Manual deployment remains available as well.
