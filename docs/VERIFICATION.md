@@ -28,3 +28,7 @@ Used the actual running application in Chrome, including a 390px-wide responsive
 The classmate trial required by the assignment has not been fabricated. Ask a classmate to open the production URL, sign in with their own account, save a station, and observe a genuine update without refreshing. Record the actual date, outcome, and any issue here after it happens.
 
 The owner added the new repository to the Vercel GitHub installation, and `vercel git connect` returned Connected. Production is deployed and the public root, snapshot, sign-in page, and custom icon all returned 200. Manual deployment remains available as well.
+
+## Nov 3 usability iteration
+
+22/22 unit tests passed, including nearest eligible station selection, empty/stale/type/return filtering, coverage and preset search. Lint, typecheck and optimized build passed. The account/database/worker contract is unchanged. Browser regression covered the initial available suggestion, cross-area Millennium result and target-area selection, e-bike recalculation, preset matches and the explicit unsupported-address state, plus the 390px phone layout. A full reload retained an explicitly selected empty Woodlawn station while the separate suggestion continued to show the available University station. Switching to return mode then reset the suggestion using actual open docks. The browser regression exposed and fixed a Strict Mode mount-effect replay that could overwrite stored trip context in local development.

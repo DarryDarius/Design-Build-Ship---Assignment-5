@@ -41,6 +41,8 @@ import {
   matches,
   PRESETS,
   quantity,
+  recommendStation,
+  searchLocations as searchLocationOptions,
   stationFreshness,
 } from "@/lib/rules";
 import catalog from "@/data/stations.json";
@@ -59,6 +61,7 @@ type Context = {
   anchor: Point;
   region: Region;
   selected: string;
+  selection: "automatic" | "suggested" | "manual";
   view: "nearby" | "saved";
 };
 const defaultContext: Context = {
@@ -67,6 +70,7 @@ const defaultContext: Context = {
   anchor: PRESETS[0],
   region: "hyde-park",
   selected: catalog[0].station_id,
+  selection: "automatic",
   view: "nearby",
 };
 const regionName = (r: Region) =>
@@ -95,6 +99,7 @@ export default function Board() {
   } = follows;
   const clerk = useClerk();
   const [context, setContext] = useState<Context>(defaultContext);
+  const [query, setQuery] = useState("");
   const watchedIds = catalog
     .filter(
       (station) =>
@@ -103,11 +108,10 @@ export default function Board() {
           ? follows.rows.some(
               (follow) => follow.station_id === station.station_id,
             )
-          : station.region === context.region),
+          : query.trim() || station.region === context.region),
     )
     .map((station) => station.station_id);
   const { snapshot, error, connection, now, refresh } = useBoard(watchedIds);
-  const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState("");
   const [mobileDetails, setMobileDetails] = useState(false);
@@ -141,6 +145,7 @@ export default function Board() {
     connection === "offline" || connection === "reconnecting";
 
   useEffect(() => {
+    if (restored.current) return;
     try {
       const raw = sessionStorage.getItem("dockside-context");
       if (raw) {
@@ -155,7 +160,10 @@ export default function Board() {
         ) {
           // Hydrate browser trip context after the server-rendered first paint.
           // eslint-disable-next-line react-hooks/set-state-in-effect
-          setContext(value);
+          setContext({
+            ...value,
+            selection: value.selection === "manual" ? "manual" : "automatic",
+          });
           hadStoredContext.current = true;
         }
       }
@@ -165,7 +173,9 @@ export default function Board() {
     restored.current = true;
   }, []);
   useEffect(() => {
-    if (!restored.current) return;
+    // Do not overwrite storage with the first default render while hydration
+    // is restoring a saved trip; Strict Mode replays mount effects in dev.
+    if (!restored.current || context === defaultContext) return;
     try {
       const safe =
         context.anchor.name === "Your location"
@@ -184,7 +194,11 @@ export default function Board() {
     initialViewOwner.current = authUserId;
     if (!hadStoredContext.current && follows.rows.length > 0) {
       // Initial view follows the signed-in user's successfully loaded preferences.
-      setContext((current) => ({ ...current, view: "saved" }));
+      setContext((current) => ({
+        ...current,
+        view: "saved",
+        selection: "automatic",
+      }));
     }
   }, [authUserId, follows.loaded, follows.rows.length]);
   useEffect(() => {
@@ -247,13 +261,10 @@ export default function Board() {
     setContext((old) => ({ ...old, ...patch }));
   const setAnchor = (point: Point) => {
     const nextRegion = point.region ?? region;
-    const nextStation = stations
-      .filter((station) => station.region === nextRegion)
-      .sort((a, b) => distance(point, a) - distance(point, b))[0];
     update({
       anchor: point,
       region: nextRegion,
-      selected: nextStation?.station_id ?? selected,
+      selection: "automatic",
       view: "nearby",
     });
     setExpanded(false);
@@ -284,17 +295,53 @@ export default function Board() {
           .map((f) => stations.find((s) => s.station_id === f.station_id))
           .filter((s): s is Station => !!s)
           .map((s) => ({ ...s, meters: distance(anchor, s) }))
-      : nearby;
+      : query.trim()
+        ? stations
+            .map((s) => ({ ...s, meters: distance(anchor, s) }))
+            .sort(
+              (a, b) =>
+                a.meters - b.meters || a.station_id.localeCompare(b.station_id),
+            )
+        : nearby;
   const visible = scope.filter(
     (s) =>
       matches(s, query) &&
       (view === "saved" || query || expanded || s.meters <= 1000),
   );
-  const nearest =
-    withinCoverage && !isDisconnected
-      ? nearby.find((s) => available(s).eligible)
-      : undefined;
-  const chosen = stations.find((s) => s.station_id === selected) ?? nearby[0];
+  const nearest = !isDisconnected
+    ? recommendStation(nearby, anchor, statusById, health, now, mode, bike)
+    : undefined;
+  const suggested =
+    view === "saved"
+      ? !isDisconnected
+        ? recommendStation(scope, anchor, statusById, health, now, mode, bike)
+        : undefined
+      : nearest;
+  const initialStation = suggested ?? scope[0];
+  const initialId = initialStation?.station_id;
+  // Pin the first verified suggestion for this task. Later live events update
+  // its quantities without moving the user's detail panel to another station.
+  useEffect(() => {
+    if (
+      context.selection !== "automatic" ||
+      freshness !== "fresh" ||
+      isDisconnected ||
+      !initialId
+    )
+      return;
+    // One-time synchronization with the first fresh external snapshot for this
+    // task; changing the guard to "suggested" prevents subsequent live repicks.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setContext((current) =>
+      current.selection === "automatic"
+        ? { ...current, selected: initialId, selection: "suggested" }
+        : current,
+    );
+  }, [context.selection, freshness, isDisconnected, initialId]);
+  const chosen =
+    context.selection === "automatic"
+      ? initialStation
+      : (stations.find((s) => s.station_id === selected) ?? initialStation);
   const chosenStatus = chosen ? statusById.get(chosen.station_id) : undefined;
   const chosenAvailability = chosen ? available(chosen) : undefined;
   const alternatives =
@@ -308,9 +355,10 @@ export default function Board() {
           .sort((a, b) => a.meters - b.meters)
           .slice(0, 2)
       : [];
-  const searchLocations = locationQuery.trim()
-    ? stations.filter((s) => matches(s, locationQuery)).slice(0, 8)
-    : [];
+  const locationOptions = searchLocationOptions(stations, locationQuery).slice(
+    0,
+    12,
+  );
   const sourceTime = health?.source_updated_at
     ? new Date(health.source_updated_at).toLocaleTimeString("en-US", {
         timeZone: "America/Chicago",
@@ -345,7 +393,18 @@ export default function Board() {
     }
   }
   function selectStation(id: string, button?: HTMLButtonElement) {
-    update({ selected: id });
+    const target = stations.find((station) => station.station_id === id);
+    update({
+      selected: id,
+      selection: "manual",
+      ...(target && target.region !== region && view === "nearby"
+        ? { region: target.region, anchor: target, view: "nearby" as const }
+        : {}),
+    });
+    if (target && target.region !== region) {
+      setQuery("");
+      setExpanded(false);
+    }
     if (button) lastSelectedButton.current = button;
     setMobileDetails(true);
   }
@@ -398,17 +457,14 @@ export default function Board() {
       const candidate = stored ? (JSON.parse(stored) as Point) : anchor;
       const point = validPoint(candidate) ? candidate : anchor;
       const nextRegion = point.region ?? region;
-      const closest = stations
-        .filter((station) => station.region === nextRegion)
-        .sort((a, b) => distance(point, a) - distance(point, b))[0];
       update({
         mode: next,
         anchor: point,
         region: nextRegion,
-        selected: closest?.station_id ?? selected,
+        selection: "automatic",
       });
     } catch {
-      update({ mode: next });
+      update({ mode: next, selection: "automatic" });
     }
   }
   const directions = chosen
@@ -516,17 +572,70 @@ export default function Board() {
         </section>
         <div className="board-grid">
           <section className="station-board" aria-label="Station availability">
+            {view === "nearby" &&
+              snapshot &&
+              !query.trim() &&
+              (nearest ? (
+                <button
+                  className="decision-strip"
+                  onClick={(event) =>
+                    selectStation(nearest.station_id, event.currentTarget)
+                  }
+                >
+                  <Navigation2 size={19} aria-hidden="true" />
+                  <span>
+                    <small>
+                      NEAREST AVAILABLE{" "}
+                      {mode === "return"
+                        ? "DOCK"
+                        : bike === "electric"
+                          ? "E-BIKE"
+                          : bike === "classic"
+                            ? "CLASSIC BIKE"
+                            : "BIKE"}
+                    </small>
+                    <strong>{nearest.name}</strong>
+                    <span>
+                      {available(nearest).count}{" "}
+                      {mode === "return"
+                        ? "open docks"
+                        : bike === "electric"
+                          ? "e-bikes"
+                          : bike === "classic"
+                            ? "classic bikes"
+                            : "bikes"}{" "}
+                      · {distanceLabel(distance(anchor, nearest))} straight-line
+                      {available(nearest).kind === "low"
+                        ? " · Limited availability"
+                        : ""}
+                    </span>
+                  </span>
+                  <ChevronRight size={20} aria-hidden="true" />
+                </button>
+              ) : (
+                <p className="decision-unavailable">
+                  {isDisconnected || freshness !== "fresh"
+                    ? "Waiting for fresh, connected station data before suggesting a stop."
+                    : !withinCoverage
+                      ? "Choose a point in our coverage area to find a nearby stop."
+                      : `No confirmed ${mode === "return" ? "open docks" : bike === "electric" ? "e-bikes" : bike === "classic" ? "classic bikes" : "bikes"} within 2.5 km. Try another type or location.`}
+                </p>
+              ))}
             <div className="board-toolbar">
               <div className="view-tabs" aria-label="Station list">
                 <button
                   className={view === "nearby" ? "active" : ""}
-                  onClick={() => update({ view: "nearby" })}
+                  onClick={() =>
+                    update({ view: "nearby", selection: "automatic" })
+                  }
                 >
                   Find a station
                 </button>
                 <button
                   className={view === "saved" ? "active" : ""}
-                  onClick={() => update({ view: "saved" })}
+                  onClick={() =>
+                    update({ view: "saved", selection: "automatic" })
+                  }
                 >
                   <Star size={14} /> My stations{" "}
                   {follows.rows.length > 0 && (
@@ -546,7 +655,7 @@ export default function Board() {
               </span>
             </div>
             <div className="list-options">
-              {view === "nearby" ? (
+              {view === "nearby" && !query.trim() ? (
                 <div className="region-tabs" aria-label="Coverage area">
                   {(["hyde-park", "loop"] as const).map((r) => (
                     <button
@@ -560,7 +669,9 @@ export default function Board() {
                 </div>
               ) : (
                 <span className="return-note">
-                  Your saved stations · both areas
+                  {view === "saved"
+                    ? "Your saved stations · both areas"
+                    : "Search results · both areas"}
                 </span>
               )}
               {mode === "borrow" ? (
@@ -570,7 +681,9 @@ export default function Board() {
                       key={type}
                       aria-pressed={bike === type}
                       className={bike === type ? "active" : ""}
-                      onClick={() => update({ bike: type })}
+                      onClick={() =>
+                        update({ bike: type, selection: "automatic" })
+                      }
                     >
                       {type === "electric" && <Zap size={12} />}{" "}
                       {type === "any"
@@ -593,9 +706,14 @@ export default function Board() {
                 placeholder={
                   view === "saved"
                     ? "Find a saved station"
-                    : "Search monitored stations"
+                    : "Search all 40 stations"
                 }
-                aria-label="Search monitored stations"
+                aria-label={
+                  view === "saved"
+                    ? "Search your saved stations"
+                    : "Search stations in Hyde Park and the Loop"
+                }
+                aria-describedby="station-search-scope"
               />
               {query && (
                 <button onClick={() => setQuery("")} aria-label="Clear search">
@@ -606,6 +724,11 @@ export default function Board() {
                 {view === "saved" ? "SAVED" : "A—Z"}
               </span>
             </label>
+            <p id="station-search-scope" className="search-scope">
+              {view === "saved"
+                ? "Searching your saved stations."
+                : "Search covers Hyde Park + The Loop. Select a result to explore its area."}
+            </p>
             {(error ||
               isDisconnected ||
               freshness === "down" ||
@@ -653,8 +776,10 @@ export default function Board() {
               <span>#</span>
               <span>STATION</span>
               <span>{mode === "borrow" ? "BIKES" : "DOCKS"}</span>
-              <span>
-                DISTANCE<sup>↗</sup>
+              <span title="Straight-line distance">
+                STRAIGHT
+                <br />
+                LINE
               </span>
               <span />
             </div>
@@ -724,7 +849,9 @@ export default function Board() {
                 </h2>
                 <p>
                   {query
-                    ? "Try a street name, like Ellis or Michigan."
+                    ? view === "saved"
+                      ? "No saved station matches. Clear the search or browse all stations."
+                      : "No match in either area. Try a station or street name, like Millennium or Ellis."
                     : view === "saved"
                       ? "Find a station, then use the star to save it here."
                       : !withinCoverage
@@ -776,6 +903,11 @@ export default function Board() {
                         <span className="station-description">
                           <span className="station-name">{station.name}</span>
                           <span className="station-meta">
+                            {query.trim() && (
+                              <span className="result-region">
+                                {regionName(station.region)}
+                              </span>
+                            )}
                             {nearest?.station_id === station.station_id &&
                             view === "nearby" ? (
                               <>
@@ -879,7 +1011,13 @@ export default function Board() {
               <div className="details-content" ref={detailsPanel}>
                 <div className="selected-station">
                   <div className="selected-top">
-                    <span>YOUR NEXT STOP</span>
+                    <span>
+                      {context.selection === "manual"
+                        ? "YOUR SELECTED STOP"
+                        : chosenAvailability?.eligible && !isDisconnected
+                          ? "SUGGESTED FIRST STOP"
+                          : "STATION DETAILS"}
+                    </span>
                     <button
                       className="mobile-close"
                       aria-label="Close station details"
@@ -901,6 +1039,10 @@ export default function Board() {
                     {regionName(chosen.region)} <span> / </span> CHICAGO
                   </p>
                   <h2>{chosen.name.replace(" & ", " &\n")}</h2>
+                  <p className="selected-distance">
+                    {distanceLabel(distance(anchor, chosen))} straight-line from{" "}
+                    {anchor.name}
+                  </p>
                   <div className="selected-inventory">
                     <span className="selected-count">
                       {chosenAvailability?.count === null ||
@@ -967,7 +1109,10 @@ export default function Board() {
                     <ArrowUpRight size={21} />
                   </a>
                   <p className="directions-note">
-                    Opens Google Maps <ExternalLink size={10} />
+                    {mode === "borrow"
+                      ? "Walking time & route in Google Maps"
+                      : "Cycling time & route in Google Maps"}{" "}
+                    <ExternalLink size={10} />
                   </p>
                 </div>
                 <div className="station-detail-meta">
@@ -988,8 +1133,8 @@ export default function Board() {
                   <div>
                     <MapPin size={14} />
                     <span>
-                      {distanceLabel(distance(anchor, chosen))} from{" "}
-                      {anchor.name}
+                      {distanceLabel(distance(anchor, chosen))} straight-line
+                      from {anchor.name}
                     </span>
                   </div>
                   {chosenStatus && (
@@ -1126,8 +1271,8 @@ export default function Board() {
             </p>
             <h2>
               {mode === "borrow"
-                ? "Where are you starting?"
-                : "Where are you returning?"}
+                ? "Choose a starting point."
+                : "Choose a return destination."}
             </h2>
           </div>
           <button
@@ -1137,23 +1282,31 @@ export default function Board() {
             <X size={21} />
           </button>
         </div>
+        <p id="location-search-scope" className="location-scope">
+          Choose a preset place or one of our 40 Divvy stations in either area.
+          Street addresses and other building names aren&apos;t searchable here.
+        </p>
         <label className="dialog-search">
           <Search size={18} />
           <input
             autoFocus
-            placeholder="Search a monitored station"
+            placeholder="Preset place or station name"
             value={locationQuery}
             onChange={(e) => setLocationQuery(e.target.value)}
-            aria-label="Search a location"
+            aria-label="Search preset places and monitored stations"
+            aria-describedby="location-search-scope"
           />
         </label>
         <p className="field-kicker">
-          {locationQuery ? "MATCHING STATIONS" : "PLACES TO START"}
+          {locationQuery ? "MATCHING PLACES & STATIONS" : "PRESET PLACES"}
         </p>
         <div className="location-options">
-          {(locationQuery ? searchLocations : PRESETS).map((point) => (
+          {(locationQuery.trim()
+            ? locationOptions
+            : PRESETS.map((point) => ({ ...point, kind: "Preset place" }))
+          ).map((point) => (
             <button
-              key={point.name}
+              key={`${point.kind}-${point.name}`}
               onClick={() =>
                 setAnchor({ ...point, region: point.region as Region })
               }
@@ -1161,15 +1314,18 @@ export default function Board() {
               <MapPin size={17} />
               <span>
                 <strong>{point.name}</strong>
-                <small>{regionName(point.region as Region)}</small>
+                <small>
+                  {point.kind} · {regionName(point.region as Region)}
+                </small>
               </span>
               <ArrowUpRight size={17} />
             </button>
           ))}
-          {locationQuery && searchLocations.length === 0 && (
+          {locationQuery.trim() && locationOptions.length === 0 && (
             <p className="dialog-help">
-              No monitored station matches. Try a street name, or clear the
-              search to choose a preset place.
+              No preset place or monitored station matches. Address search
+              isn&apos;t available. Try a nearby street or station name, clear
+              the search for presets, or use your current location below.
             </p>
           )}
         </div>

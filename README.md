@@ -16,11 +16,11 @@ Built for MPCS 51238, Design, Build, Ship — Assignment 5.
 4. Open a station for details, nearby alternatives, and an external Google Maps route.
 5. Use a star to save your everyday stations. Clerk sign-in preserves the selected task and pending save. **My stations** contains only your choices.
 
-The board works publicly; personal saves require sign-in. The coverage control explains the monitored area. Search covers monitored stations and preset places, not arbitrary street addresses.
+The board works publicly; personal saves require sign-in. The coverage control explains the monitored area. Station search spans both neighborhoods, labels each result’s area, and opens cross-area results in that area. The location picker searches presets and monitored stations; it explicitly explains that arbitrary street addresses and other buildings are unsupported.
 
 ## Product and design
 
-Dockside uses the visual language of civic wayfinding: cobalt blue, a restrained station index, aligned availability numbers, compact typography, and continuous rows. The primary heading and information change with the task. Phone layouts use a station-detail sheet with focus management; desktop layouts put the same details beside the list.
+Dockside uses the visual language of civic wayfinding: cobalt blue, a restrained station index, aligned availability numbers, compact typography, and continuous rows. The primary heading and information change with the task. The first fresh snapshot selects the nearest eligible stop; a compact recommendation shows its quantity and straight-line distance. Manual selections and later live updates keep the detail panel stable. Phone layouts use a station-detail sheet with focus management; desktop layouts put the same details beside the list.
 
 - Return searches center on the **destination**, rather than automatically using the rider's current location.
 - Bicycle totals come from GBFS vehicle types. Scooters are excluded.
@@ -138,6 +138,10 @@ Detailed checklist: [Verification](docs/VERIFICATION.md). Evidence: [Realtime](d
 At 60 seconds per run, 30 days is approximately **43,200 Edge Function calls**, before manual tests, against the current 500,000-call free allowance. Only 40 stations are monitored; unchanged business rows are not rewritten. Realtime is scoped and run history is bounded. Message fan-out and egress still depend on active viewers; monitor the Supabase usage dashboard.
 
 Supabase's current free limits include a 500 MB database and two million Realtime messages per month. Free plans impose limits; no payment method or paid upgrade was added for this project. Keep the project available until grading is complete. Check current quotas in [Supabase pricing](https://supabase.com/pricing).
+
+## User feedback and current limitations
+
+The Nov 3 [usability review and iteration record](docs/USER-FEEDBACK.md) tracks reported issues and changes. Local-only guest saves and arbitrary address search remain future work. The web deployment is public; Clerk still uses a development instance. Moving identity to a production instance requires a production domain and DNS setup, production credentials, and an updated Supabase trust configuration. The development badge has not been cosmetically hidden.
 
 ## Human acceptance
 

@@ -7,6 +7,8 @@ import {
   matches,
   quantity,
   stationFreshness,
+  recommendStation,
+  searchLocations,
 } from "../../src/lib/rules";
 import type { Health, Station, StationStatus } from "../../src/lib/types";
 
@@ -119,4 +121,130 @@ test("distance is geographical and symmetrical", () => {
   assert.equal(distance(a, a), 0);
   assert.ok(distance(a, b) > 1000 && distance(a, b) < 1300);
   assert.ok(Math.abs(distance(a, b) - distance(b, a)) < 0.01);
+});
+
+const origin = {
+  name: "Start",
+  lat: 41.7886,
+  lon: -87.5987,
+  region: "hyde-park" as const,
+};
+const near = { ...origin, station_id: "s1", short_name: "ONE", capacity: 20 };
+const farther = {
+  ...near,
+  name: "Second",
+  station_id: "s2",
+  lat: origin.lat + 0.002,
+};
+const reports = {
+  ...health,
+  station_reports: { s1: now / 1000 - 60, s2: now / 1000 - 60 },
+};
+test("first suggestion skips an empty closer station and selects the nearest fresh available one", () => {
+  const rows = new Map([
+    ["s1", { ...status, classic: 0, electric: 0 }],
+    ["s2", { ...status, station_id: "s2" }],
+  ]);
+  assert.equal(
+    recommendStation(
+      [near, farther],
+      origin,
+      rows,
+      reports,
+      now,
+      "borrow",
+      "any",
+    )?.station_id,
+    "s2",
+  );
+  assert.equal(
+    recommendStation(
+      [farther, near],
+      origin,
+      new Map([
+        ["s1", status],
+        ["s2", { ...status, station_id: "s2" }],
+      ]),
+      reports,
+      now,
+      "borrow",
+      "any",
+    )?.station_id,
+    "s1",
+  );
+});
+test("recommendations honor e-bike choice, return flags, old reports and coverage", () => {
+  const rows = new Map([
+    ["s1", { ...status, electric: 0, docks: 5, returning: false }],
+    ["s2", { ...status, station_id: "s2", docks: 4 }],
+  ]);
+  assert.equal(
+    recommendStation(
+      [near, farther],
+      origin,
+      rows,
+      reports,
+      now,
+      "borrow",
+      "electric",
+    )?.station_id,
+    "s2",
+  );
+  assert.equal(
+    recommendStation(
+      [near, farther],
+      origin,
+      rows,
+      reports,
+      now,
+      "return",
+      "any",
+    )?.station_id,
+    "s2",
+  );
+  assert.equal(
+    recommendStation(
+      [near, farther],
+      origin,
+      rows,
+      {
+        ...reports,
+        station_reports: { s1: now / 1000 - 301, s2: now / 1000 - 301 },
+      },
+      now,
+      "borrow",
+      "any",
+    ),
+    undefined,
+  );
+  assert.equal(
+    recommendStation(
+      [near],
+      { ...origin, lat: 40 },
+      rows,
+      reports,
+      now,
+      "borrow",
+      "any",
+    ),
+    undefined,
+  );
+});
+test("location search includes presets and both regions without fabricating address matches", () => {
+  assert.ok(
+    searchLocations([near], "Millennium").some(
+      (point) => point.name === "Millennium Park" && point.region === "loop",
+    ),
+  );
+  assert.ok(
+    searchLocations([near], "UChicago").some(
+      (point) => point.kind === "Preset place",
+    ),
+  );
+  assert.ok(
+    searchLocations([farther], "Second").some(
+      (point) => point.kind === "Divvy station",
+    ),
+  );
+  assert.equal(searchLocations([near], "NEMA").length, 0);
 });

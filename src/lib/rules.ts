@@ -164,15 +164,52 @@ export function availability(
     eligible: true,
   };
 }
-export function matches(station: Station, query: string): boolean {
+export function matches(
+  station: { name: string; short_name?: string },
+  query: string,
+): boolean {
   const norm = (s: string) =>
     s
       .toLowerCase()
       .replace(/&|\band\b/g, " ")
       .replace(/[^a-z0-9]+/g, " ")
       .trim();
-  const haystack = norm(`${station.name} ${station.short_name}`);
+  const haystack = norm(`${station.name} ${station.short_name ?? ""}`);
   return norm(query)
     .split(/\s+/)
     .every((word) => haystack.includes(word));
+}
+
+export function recommendStation(
+  stations: Station[],
+  anchor: Point,
+  statuses: Map<string, StationStatus>,
+  health: Health | null,
+  now: number,
+  mode: Mode,
+  bike: BikeType,
+): Station | undefined {
+  return [...stations]
+    .filter((station) => distance(anchor, station) < 2500)
+    .sort(
+      (a, b) =>
+        distance(anchor, a) - distance(anchor, b) ||
+        a.station_id.localeCompare(b.station_id),
+    )
+    .find(
+      (station) =>
+        availability(
+          statuses.get(station.station_id),
+          mode,
+          bike,
+          stationFreshness(station.station_id, health, now),
+        ).eligible,
+    );
+}
+
+export function searchLocations(stations: Station[], query: string) {
+  return [
+    ...PRESETS.map((point) => ({ ...point, kind: "Preset place" })),
+    ...stations.map((station) => ({ ...station, kind: "Divvy station" })),
+  ].filter((point) => matches(point, query));
 }

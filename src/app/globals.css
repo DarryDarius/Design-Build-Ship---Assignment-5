@@ -1971,3 +1971,184 @@ h1 {
     margin-bottom: 20px;
   }
 }
+
+/* User-trial refinement: a decision first, with readable supporting detail. */
+.decision-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--blue);
+  background: #e9eefc;
+  text-align: left;
+  color: var(--blue);
+}
+.decision-strip > span {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.decision-strip small {
+  font-family: var(--number);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.decision-strip strong {
+  font-size: 17px;
+  line-height: 1.3;
+}
+.decision-strip > span > span {
+  color: #35485c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.decision-strip:hover {
+  background: #dde6fc;
+}
+.decision-unavailable {
+  padding: 14px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4d5b64;
+}
+.search-scope {
+  margin: -6px 0 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #4d5b64;
+}
+.location-scope {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4d5b64;
+}
+.result-region {
+  color: var(--ink);
+  font-weight: 600;
+}
+.selected-distance {
+  margin: 12px 0 22px;
+  color: #edf2ff;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.station-name {
+  font-size: 16px;
+}
+.station-meta {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.station-distance,
+.station-index {
+  font-size: 12px;
+}
+.type-summary,
+.station-distance,
+.station-index {
+  color: #4d5b64;
+}
+.station-detail-meta > div {
+  font-size: 13px;
+}
+.inventory-breakdown,
+.directions-note {
+  font-size: 12px;
+}
+.selected-area,
+.selected-top {
+  color: #e5ebff;
+}
+.return-note,
+.board-footnote,
+.system-footer summary,
+.dialog-help,
+.field-kicker {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.dialog-search input,
+.station-search > input {
+  font-size: 14px;
+}
+.column-head {
+  font-size: 10px;
+}
+@media (max-width: 740px) {
+  .decision-strip {
+    padding: 13px 12px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .decision-strip strong {
+    font-size: 16px;
+  }
+  .decision-strip small {
+    font-size: 10px;
+  }
+  .decision-strip > span > span {
+    font-size: 12px;
+  }
+  .station-select {
+    grid-template-columns: 20px minmax(0, 1fr) 43px 58px;
+    min-height: 98px;
+  }
+  .column-head {
+    grid-template-columns: 20px minmax(0, 1fr) 43px 58px 44px;
+    font-size: 9px;
+  }
+  .station-index {
+    font-size: 10px;
+    padding-left: 3px;
+  }
+  .station-name {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .station-meta {
+    font-size: 12px;
+    gap: 5px 8px;
+  }
+  .station-distance {
+    font-size: 11px;
+  }
+  .station-quantity {
+    font-size: 32px;
+  }
+  .station-description {
+    padding-right: 8px;
+  }
+  .selected-area,
+  .selected-top {
+    font-size: 12px;
+  }
+  .station-detail-meta > div,
+  .inventory-breakdown {
+    font-size: 14px;
+  }
+  .directions-note,
+  .dialog-help,
+  .location-options small {
+    font-size: 13px;
+  }
+  .location-options strong {
+    font-size: 15px;
+  }
+  .dialog-search input,
+  .station-search > input {
+    font-size: 16px;
+  }
+  .region-tabs > button,
+  .bike-filter > button {
+    font-size: 12px;
+  }
+  .list-options {
+    flex-wrap: wrap;
+  }
+}
