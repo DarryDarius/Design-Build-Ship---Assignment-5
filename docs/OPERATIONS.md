@@ -87,3 +87,18 @@ The production deployment is ready and its public root, snapshot, sign-in page, 
 - Public health contains only sanitized status, not internal exception bodies or credentials.
 - Source-directory curation is fixed for this first release. To change coverage, review and regenerate the catalog and coverage SQL, update the database intentionally, and redeploy the worker and web app together. Do not casually regenerate a different catalog against an existing live deployment.
 - A free project may pause after inactivity. Confirm it remains healthy until grading is complete.
+
+## Project-scoped Supabase MCP
+
+`.mcp.json` supports Claude Code and `.codex/config.toml` provides the corresponding Codex project configuration. Both target only `qhoubpcpelxruxnbgead`; no credentials are stored in either file. Use the Dockside repository as the trusted project root. Some CLI management commands may use only global configuration, so the reproducible command below explicitly supplies the same scoped endpoint without modifying global configuration:
+
+```bash
+codex -c 'mcp_servers.supabase_dockside.url="https://mcp.supabase.com/mcp?project_ref=qhoubpcpelxruxnbgead"' mcp login supabase_dockside
+node scripts/verify-mcp.mjs
+```
+
+OAuth is handled and stored by Codex. The verifier uses Codex's local protocol client and the real MCP SQL tool; it starts no model turn and uses no extra reasoning agent. It verifies table counts and active cron. `docs/mcp-verification.json` records the query result; `docs/mcp-setup-verification.json` preserves the deployment/schedule completion proof across later read-only checks.
+
+The authorized completion run also used `node scripts/verify-mcp.mjs --complete-setup` to republish the reviewed current function files and reapply the same named cron schedule through MCP. This is an intentional deployment operation, not needed for normal read-only verification. The function still requires its existing private header, and an unauthorized call was retested as 401.
+
+Official references: [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp), [Supabase MCP](https://supabase.com/docs/guides/ai-tools/mcp).

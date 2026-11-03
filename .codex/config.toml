@@ -1,0 +1,5 @@
+# Codex project-local counterpart to .mcp.json. Contains no credentials.
+[mcp_servers.supabase_dockside]
+url = "https://mcp.supabase.com/mcp?project_ref=qhoubpcpelxruxnbgead"
+startup_timeout_sec = 30
+tool_timeout_sec = 60

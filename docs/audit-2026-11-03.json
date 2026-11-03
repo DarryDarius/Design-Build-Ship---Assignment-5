@@ -1,0 +1,133 @@
+{
+  "audit": {
+    "checked_at": "2026-11-03T19:24:27.892881+00:00",
+    "cron": [
+      {
+        "active": true,
+        "jobname": "dockside-poll",
+        "schedule": "* * * * *"
+      }
+    ],
+    "database_bytes": 13571763,
+    "health": {
+      "last_result": "success",
+      "last_success_at": "2026-11-03T19:24:01.468233+00:00",
+      "missing": 0,
+      "source_updated_at": "2026-11-03T19:23:41+00:00",
+      "station_reports": 40
+    },
+    "latest_three": [
+      {
+        "changed_count": 3,
+        "duration_ms": 757,
+        "error_code": null,
+        "missing_count": 0,
+        "read_count": 40,
+        "result": "success",
+        "started_at": "2026-11-03T19:24:01.180776+00:00"
+      },
+      {
+        "changed_count": 3,
+        "duration_ms": 267,
+        "error_code": null,
+        "missing_count": 0,
+        "read_count": 40,
+        "result": "success",
+        "started_at": "2026-11-03T19:23:00.389357+00:00"
+      },
+      {
+        "changed_count": 0,
+        "duration_ms": 303,
+        "error_code": null,
+        "missing_count": 0,
+        "read_count": 40,
+        "result": "success",
+        "started_at": "2026-11-03T19:22:46.283961+00:00"
+      }
+    ],
+    "publication": [
+      "dockside_station_status",
+      "dockside_source_health"
+    ],
+    "rls": [
+      {
+        "enabled": true,
+        "table": "dockside_follows"
+      },
+      {
+        "enabled": true,
+        "table": "dockside_source_health"
+      },
+      {
+        "enabled": true,
+        "table": "dockside_station_status"
+      },
+      {
+        "enabled": true,
+        "table": "dockside_stations"
+      },
+      {
+        "enabled": true,
+        "table": "dockside_worker_runs"
+      }
+    ],
+    "run_results_24h": [
+      {
+        "count": 1,
+        "result": "failed"
+      },
+      {
+        "count": 1110,
+        "result": "success"
+      }
+    ],
+    "stations": 40,
+    "statuses": 40
+  },
+  "checks": {
+    "unit_tests": 22,
+    "unit_tests_passed": 22,
+    "lint": "passed",
+    "typecheck": "passed",
+    "production_build": "passed",
+    "database_invariants": "passed; all writes rolled back",
+    "real_clerk_rls": "passed",
+    "realtime_event": "received",
+    "unauthorized_worker_http": 401,
+    "github_history_secret_pattern_scan": "passed",
+    "classroom_status": "Turned in",
+    "classroom_app_link": "verified correct",
+    "classroom_github_link": "verified correct",
+    "classmate_trial": "owner confirmed completed; date and result details not yet provided",
+    "supabase_plan": "Free; spend cap enabled; no payment methods",
+    "vercel_plan": "Hobby",
+    "supabase_mcp": "PASS: actual project-scoped MCP execute_sql query, worker redeployed and same minute cron schedule set through MCP",
+    "classroom_explanation_readiness": "not assessed interactively"
+  },
+  "mcp_follow_up": {
+    "verified_at": "2026-11-03T19:21:36.725Z",
+    "transport": "Supabase Streamable HTTP MCP via Codex protocol client",
+    "project_ref": "qhoubpcpelxruxnbgead",
+    "scoped_url": "https://mcp.supabase.com/mcp?project_ref=qhoubpcpelxruxnbgead",
+    "tool": "execute_sql",
+    "stations": 40,
+    "statuses": 40,
+    "cron_active": true,
+    "model_turns_started": 0,
+    "credentials_logged": false,
+    "worker_deployed_via_mcp": true,
+    "worker_name": "dockside-poll",
+    "cron_set_via_mcp": true,
+    "cron_schedule": "* * * * *"
+  },
+  "observed_failure": {
+    "started_at": "2026-11-03T16:39:00.505798+00:00",
+    "error_code": "invalid_source_response",
+    "http_status": null,
+    "next_run": "2026-11-03T16:40:00.389707+00:00",
+    "next_result": "success",
+    "next_read_count": 40,
+    "next_changed_count": 4,
+    "root_cause": "not established from retained sanitized logs"
+  }
+}

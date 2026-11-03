@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-11-03T01:14:07.319Z",
+  "verified_at": "2026-11-03T07:10:06.553Z",
   "authentication": "Two real Clerk-signed session JWTs",
   "checks": [
     "authenticated role claim",

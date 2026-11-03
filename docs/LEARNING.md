@@ -85,4 +85,8 @@ Use these as a conversational quiz, one at a time, before looking at the explana
 
 ## Classmate trial
 
-Still to be performed by a real classmate. Ask them to sign in on the public site, save a few busy monitored stations, switch tasks, and watch a genuine change without refreshing. Record their actual feedback and improve the product if a step is confusing. No classmate trial has been fabricated in these notes.
+On November 3, the project owner confirmed that a real classmate had signed in, saved stations, and observed a genuine update without refreshing. The actual trial date and result details are awaiting the owner; the agent did not independently observe that trial.
+
+## MCP versus CLI
+
+The CLI makes authenticated management operations directly. The MCP server exposes project tools through the Model Context Protocol. Both have now been exercised: the project-scoped MCP execute_sql query returned the live table counts, and deploy_edge_function plus execute_sql republished the current worker and set its named schedule. Having a config file alone was not treated as proof of a working connection. OAuth credentials remain in the client credential store.

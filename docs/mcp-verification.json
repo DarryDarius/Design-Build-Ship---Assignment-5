@@ -1,0 +1,12 @@
+{
+  "verified_at": "2026-11-03T19:24:29.611Z",
+  "transport": "Supabase Streamable HTTP MCP via Codex protocol client",
+  "project_ref": "qhoubpcpelxruxnbgead",
+  "scoped_url": "https://mcp.supabase.com/mcp?project_ref=qhoubpcpelxruxnbgead",
+  "tool": "execute_sql",
+  "stations": 40,
+  "statuses": 40,
+  "cron_active": true,
+  "model_turns_started": 0,
+  "credentials_logged": false
+}

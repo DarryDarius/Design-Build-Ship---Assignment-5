@@ -131,6 +131,8 @@ node scripts/verify-auth.mjs
 
 The SQL checks roll back every test write. The auth verification uses two synthetic accounts in the Dockside development instance, real Clerk-signed JWTs, owner operations, cross-user attacks, and cleanup. Verification sessions are revoked. The realtime verification receives a real database event after invoking the real worker.
 
+Project-scoped MCP has also been connected and used to query the database, deploy the worker, and set its schedule. Evidence: [MCP](docs/mcp-verification.json).
+
 Detailed checklist: [Verification](docs/VERIFICATION.md). Evidence: [Realtime](docs/realtime-verification.json), [Clerk/RLS](docs/auth-verification.json). See [docs/LEARNING.md](docs/LEARNING.md) for field explanations, tracing an update, run-log interpretation, and classroom questions.
 
 ## Free-tier budget
@@ -145,4 +147,6 @@ The Nov 3 [usability review and iteration record](docs/USER-FEEDBACK.md) tracks 
 
 ## Human acceptance
 
-Automated/service checks do not replace the assignment's classmate trial. A classmate should open the public URL, sign in with their own account, save stations, and observe a genuine availability update without refreshing. Record the date and any issues after that trial; do not claim it happened before it does.
+On November 3, the project owner confirmed that a real classmate had signed in, saved stations, and observed a genuine update without refreshing. The actual trial date and result details are awaiting the owner; the agent did not independently observe that trial.
+
+See the [Assignment 5 audit](docs/ASSIGNMENT5-AUDIT.md) for requirement-by-requirement results, completed MCP follow-up, and classroom preparation notes.
