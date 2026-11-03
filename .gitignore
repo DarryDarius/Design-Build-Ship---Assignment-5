@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/.clerk/
+/test-results/
+/playwright-report/
+/supabase/.temp/
+/supabase/.branches/
+/\.local-secrets/
+.local-secrets/
+!/\.env.example

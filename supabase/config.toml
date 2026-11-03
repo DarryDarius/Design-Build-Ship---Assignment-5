@@ -1,0 +1,11 @@
+project_id = "dockside"
+
+[auth.third_party.clerk]
+enabled = true
+domain = "hot-crayfish-178.clerk.accounts.dev"
+
+[functions.dockside-poll]
+verify_jwt = false
+
+# The function itself requires the exact service-role bearer token.
+# The public publishable/anon key and Clerk tokens are rejected.
