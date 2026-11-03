@@ -17,6 +17,7 @@ export function useFollows() {
     loaded: boolean;
   }>({ owner: null, rows: [], error: null, loaded: false });
   const [pending, setPending] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
   useEffect(() => {
     if (!userId || !db) return;
     let cancelled = false;
@@ -38,7 +39,7 @@ export function useFollows() {
     return () => {
       cancelled = true;
     };
-  }, [userId, db]);
+  }, [userId, db, revision]);
   const rows = state.owner === userId ? state.rows : [];
   const toggle = useCallback(
     async (id: string, save: boolean) => {
@@ -86,5 +87,9 @@ export function useFollows() {
     toggle,
     error: state.owner === userId ? state.error : null,
     loaded: state.owner === userId && state.loaded,
+    retry: () => {
+      setState({ owner: userId ?? null, rows: [], error: null, loaded: false });
+      setRevision((value) => value + 1);
+    },
   };
 }

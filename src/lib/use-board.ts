@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { makeClient } from "./supabase";
 import type { Snapshot } from "./types";
 
-export function useBoard() {
+export function useBoard(stationIds: string[]) {
+  const filterIds = stationIds.join(",");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [connection, setConnection] = useState<
@@ -45,6 +46,7 @@ export function useBoard() {
     void refresh();
     const clock = setInterval(() => setNow(Date.now()), 1000);
     const db = makeClient();
+    let cancelled = false;
     let pending: ReturnType<typeof setTimeout> | undefined;
     const reconcile = () => {
       clearTimeout(pending);
@@ -54,7 +56,12 @@ export function useBoard() {
       ?.channel("dockside-board")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "dockside_station_status" },
+        {
+          event: "*",
+          schema: "public",
+          table: "dockside_station_status",
+          filter: `station_id=in.(${filterIds})`,
+        },
         reconcile,
       )
       .on(
@@ -68,7 +75,7 @@ export function useBoard() {
         reconcile,
       )
       .subscribe((status) => {
-        if (!live.current) return;
+        if (cancelled) return;
         if (status === "SUBSCRIBED") {
           setConnection("live");
           void refresh();
@@ -96,6 +103,7 @@ export function useBoard() {
     document.addEventListener("visibilitychange", visible);
     return () => {
       live.current = false;
+      cancelled = true;
       clearInterval(clock);
       clearInterval(previewClock);
       clearTimeout(pending);
@@ -104,6 +112,6 @@ export function useBoard() {
       window.removeEventListener("online", online);
       document.removeEventListener("visibilitychange", visible);
     };
-  }, [refresh]);
+  }, [refresh, filterIds]);
   return { snapshot, error, connection, now, refresh };
 }

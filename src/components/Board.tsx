@@ -87,7 +87,6 @@ const validPoint = (point: Point) =>
   typeof point.name === "string";
 
 export default function Board() {
-  const { snapshot, error, connection, now, refresh } = useBoard();
   const follows = useFollows();
   const {
     isLoaded: authLoaded,
@@ -96,6 +95,18 @@ export default function Board() {
   } = follows;
   const clerk = useClerk();
   const [context, setContext] = useState<Context>(defaultContext);
+  const watchedIds = catalog
+    .filter(
+      (station) =>
+        station.station_id === context.selected ||
+        (context.view === "saved"
+          ? follows.rows.some(
+              (follow) => follow.station_id === station.station_id,
+            )
+          : station.region === context.region),
+    )
+    .map((station) => station.station_id);
+  const { snapshot, error, connection, now, refresh } = useBoard(watchedIds);
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState("");
@@ -111,6 +122,8 @@ export default function Board() {
     () => false,
   );
   const restored = useRef(false),
+    hadStoredContext = useRef(false),
+    initialViewOwner = useRef<string | null>(null),
     pendingHandled = useRef(false),
     lastSelectedButton = useRef<HTMLButtonElement | null>(null);
   const { mode, bike, anchor, region, selected, view } = context;
@@ -137,14 +150,13 @@ export default function Board() {
           (value.region === "hyde-park" || value.region === "loop") &&
           ["any", "classic", "electric"].includes(value.bike) &&
           ["nearby", "saved"].includes(value.view) &&
-          Number.isFinite(value.anchor?.lat) &&
-          Number.isFinite(value.anchor?.lon) &&
-          typeof value.anchor?.name === "string" &&
+          validPoint(value.anchor) &&
           catalog.some((s) => s.station_id === value.selected)
         ) {
           // Hydrate browser trip context after the server-rendered first paint.
           // eslint-disable-next-line react-hooks/set-state-in-effect
           setContext(value);
+          hadStoredContext.current = true;
         }
       }
     } catch {
@@ -162,6 +174,19 @@ export default function Board() {
       sessionStorage.setItem("dockside-context", JSON.stringify(safe));
     } catch {}
   }, [context, region]);
+  useEffect(() => {
+    if (
+      !authUserId ||
+      !follows.loaded ||
+      initialViewOwner.current === authUserId
+    )
+      return;
+    initialViewOwner.current = authUserId;
+    if (!hadStoredContext.current && follows.rows.length > 0) {
+      // Initial view follows the signed-in user's successfully loaded preferences.
+      setContext((current) => ({ ...current, view: "saved" }));
+    }
+  }, [authUserId, follows.loaded, follows.rows.length]);
   useEffect(() => {
     if (!authLoaded || !authUserId || pendingHandled.current) return;
     let pending: string | null = null;
@@ -221,17 +246,22 @@ export default function Board() {
   const update = (patch: Partial<Context>) =>
     setContext((old) => ({ ...old, ...patch }));
   const setAnchor = (point: Point) => {
-    update({ anchor: point, region: point.region ?? region, view: "nearby" });
+    const nextRegion = point.region ?? region;
+    const nextStation = stations
+      .filter((station) => station.region === nextRegion)
+      .sort((a, b) => distance(point, a) - distance(point, b))[0];
+    update({
+      anchor: point,
+      region: nextRegion,
+      selected: nextStation?.station_id ?? selected,
+      view: "nearby",
+    });
     setExpanded(false);
     setQuery("");
     locationDialog.current?.close();
   };
   const switchRegion = (next: Region) => {
     setAnchor(PRESETS.find((p) => p.region === next)!);
-    update({
-      region: next,
-      selected: stations.find((s) => s.region === next)!.station_id,
-    });
   };
   const available = (s: Station) =>
     availability(
@@ -367,7 +397,16 @@ export default function Board() {
       const stored = sessionStorage.getItem(`dockside-anchor-${next}`);
       const candidate = stored ? (JSON.parse(stored) as Point) : anchor;
       const point = validPoint(candidate) ? candidate : anchor;
-      update({ mode: next, anchor: point, region: point.region ?? region });
+      const nextRegion = point.region ?? region;
+      const closest = stations
+        .filter((station) => station.region === nextRegion)
+        .sort((a, b) => distance(point, a) - distance(point, b))[0];
+      update({
+        mode: next,
+        anchor: point,
+        region: nextRegion,
+        selected: closest?.station_id ?? selected,
+      });
     } catch {
       update({ mode: next });
     }
@@ -400,11 +439,18 @@ export default function Board() {
         <div className="board-intro">
           <div>
             <p className="eyebrow">
-              <span className="small-square" /> YOUR NEIGHBORHOOD, IN MOTION
+              <span className="small-square" /> CHICAGO / DIVVY STATION BOARD
             </p>
             <h1>
-              Every ride starts
-              <br className="mobile-break" /> with a <span>good stop.</span>
+              {mode === "borrow" ? (
+                <>
+                  Find a <span>bike.</span>
+                </>
+              ) : (
+                <>
+                  Find an <span>open dock.</span>
+                </>
+              )}
             </h1>
           </div>
           <button
@@ -500,17 +546,23 @@ export default function Board() {
               </span>
             </div>
             <div className="list-options">
-              <div className="region-tabs" aria-label="Coverage area">
-                {(["hyde-park", "loop"] as const).map((r) => (
-                  <button
-                    key={r}
-                    className={region === r ? "active" : ""}
-                    onClick={() => switchRegion(r)}
-                  >
-                    {regionName(r)}
-                  </button>
-                ))}
-              </div>
+              {view === "nearby" ? (
+                <div className="region-tabs" aria-label="Coverage area">
+                  {(["hyde-park", "loop"] as const).map((r) => (
+                    <button
+                      key={r}
+                      className={region === r ? "active" : ""}
+                      onClick={() => switchRegion(r)}
+                    >
+                      {regionName(r)}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <span className="return-note">
+                  Your saved stations · both areas
+                </span>
+              )}
               {mode === "borrow" ? (
                 <div className="bike-filter" aria-label="Bicycle type">
                   {(["any", "classic", "electric"] as const).map((type) => (
@@ -640,12 +692,23 @@ export default function Board() {
               <div className="empty-state">
                 <h2>Your stations couldn&apos;t load.</h2>
                 <p>{follows.error}</p>
-                <button
-                  className="outline-button"
-                  onClick={() => location.reload()}
-                >
+                <button className="outline-button" onClick={follows.retry}>
                   Try again
                 </button>
+              </div>
+            ) : view === "saved" && follows.userId && !follows.loaded ? (
+              <div
+                className="skeleton-board"
+                role="status"
+                aria-label="Loading your saved stations"
+              >
+                {[0, 1, 2].map((i) => (
+                  <div className="skeleton-row" key={i}>
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                ))}
               </div>
             ) : visible.length === 0 ? (
               <div className="empty-state">
@@ -715,10 +778,17 @@ export default function Board() {
                           <span className="station-meta">
                             {nearest?.station_id === station.station_id &&
                             view === "nearby" ? (
-                              <span className="nearest-label">
-                                <Navigation2 size={11} />
-                                Nearest available
-                              </span>
+                              <>
+                                <span className="nearest-label">
+                                  <Navigation2 size={11} />
+                                  Nearest available
+                                </span>
+                                {state.kind === "low" && (
+                                  <span className="availability-label low">
+                                    {state.label}
+                                  </span>
+                                )}
+                              </>
                             ) : (
                               <span
                                 className={`availability-label ${state.kind}`}
@@ -730,6 +800,7 @@ export default function Board() {
                               </span>
                             )}
                             {state.kind !== "unknown" &&
+                              state.kind !== "low" &&
                               status &&
                               mode === "borrow" && (
                                 <span className="type-summary">

@@ -44,6 +44,5 @@ next-env.d.ts
 /playwright-report/
 /supabase/.temp/
 /supabase/.branches/
-/\.local-secrets/
 .local-secrets/
-!/\.env.example
+!.env.example

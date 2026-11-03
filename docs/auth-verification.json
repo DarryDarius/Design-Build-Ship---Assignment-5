@@ -1,0 +1,12 @@
+{
+  "verified_at": "2026-11-03T01:14:07.319Z",
+  "authentication": "Two real Clerk-signed session JWTs",
+  "checks": [
+    "authenticated role claim",
+    "owner-only insert and read",
+    "cross-user read isolation",
+    "spoofed ownership rejected",
+    "cross-user delete isolation",
+    "test follow removed"
+  ]
+}

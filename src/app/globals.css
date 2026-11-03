@@ -1922,3 +1922,52 @@ h1 > span {
     max-width: calc(100% - 65px);
   }
 }
+/* Keep the task and useful station rows above the fold. */
+.masthead {
+  height: 78px;
+}
+.workspace {
+  padding-top: 30px;
+}
+.board-intro {
+  margin-bottom: 24px;
+}
+h1 {
+  font-size: 36px;
+}
+.trip-controls {
+  min-height: 79px;
+  margin-bottom: 24px;
+}
+.list-options {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.station-search {
+  margin-bottom: 16px;
+}
+@media (min-width: 1500px) {
+  .workspace {
+    padding-top: 38px;
+  }
+  .station-select {
+    min-height: 94px;
+  }
+}
+@media (max-width: 740px) {
+  .masthead {
+    height: 72px;
+  }
+  .workspace {
+    padding-top: 24px;
+  }
+  .board-intro {
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  .trip-controls {
+    margin-bottom: 20px;
+  }
+}
